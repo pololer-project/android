@@ -58,7 +58,7 @@ class ShowConfig:
             sub_dir=base / "subtitle",
             tmdb_id=291414,
             titles=(
-                "Tamat Sudah Riwayatku.",
+                "Kayaknya Hidupku Kelar, deh.",
                 "Android wa Keiken Ninzuu ni Hairimasu ka?",
                 "Android wa Keiken Ninzuu ni Hairimasu ka?",
                 "Android wa Keiken Ninzuu ni Hairimasu ka?",
@@ -92,14 +92,17 @@ def _get_episode_str(episode: str | int) -> str:
 def _find_video(ep_str: str, config: ShowConfig) -> Path:
     """Find the video file for the given episode string."""
     search = GlobSearch(
-        "*.mkv", allow_multiple=True, recursive=True, dir=str(config.premux_dir)
+        "*.mkv",
+        allow_multiple=True,
+        recursive=True,
+        dir=str(config.premux_dir),
     )
 
     for p in search.paths:
         name = Path(p).name
 
-        # Standard episode match: " - 01 " or "E01)"
-        if f" - {ep_str} " in name or f"E{ep_str})" in name:
+        # Standard episode match: " - 01 ", "E01)", or "S01E01"
+        if f" - {ep_str} " in name or f"E{ep_str})" in name or f"S01E{ep_str}" in name:
             return Path(p)
 
     raise FileNotFoundError(f"Video file not found for episode {ep_str}")
@@ -163,7 +166,7 @@ def mux_episode(
     try:
         # Locating Resources
         video_file = _find_video(ep_str, config)
-        setup.set_default_sub_timesource(video_file)
+        setup.set_default_sub_timesource(str(video_file))
 
         sub_file = _find_subtitle(ep_str, config)
 
@@ -181,7 +184,7 @@ def mux_episode(
 
         # Muxing
         premux = Premux(
-            video_file,
+            str(video_file),
             subtitles=None,
             keep_attachments=False,
             mkvmerge_args=["--no-global-tags", "--no-chapters"],

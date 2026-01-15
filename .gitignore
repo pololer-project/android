@@ -1,6 +1,7 @@
 # By default, ignore _all_ files, but not directories
 /.venv
 !*/
+__pycache__
 
 # Important project files
 !.gitattributes
